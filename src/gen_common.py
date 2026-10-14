@@ -24,10 +24,10 @@ PAD = dict(PAD_LEFT=0x0001, PAD_RIGHT=0x0002, PAD_DOWN=0x0004, PAD_UP=0x0008, PA
            PAD_START=0x1000)
 
 GC_SITES = {
-    'RMGE01': dict(sample=0x8045121C, ring=0x804507F0, probe=0x804D8ACC, radio=0x80450720),
-    'RMGP01': dict(sample=0x80451238, ring=0x8045080C, probe=0x804D8ACC, radio=0x8045073C),
-    'RMGJ01': dict(sample=0x80451218, ring=0x804507EC, probe=0x804D8AAC, radio=0x8045071C),
-    'RMGK01': dict(sample=0x80452C14, ring=0x804521E8, probe=0x804D9F9C, radio=0x80452118),
+    'RMGE01': dict(sample=0x8045121C, ring=0x804507F0, probe=0x804D8ACC, radio=0x80450720, wpd=0x80660170, ctrl=0x803AB568),
+    'RMGP01': dict(sample=0x80451238, ring=0x8045080C, probe=0x804D8ACC, radio=0x8045073C, wpd=0x80660170, ctrl=0x803AB584),
+    'RMGJ01': dict(sample=0x80451218, ring=0x804507EC, probe=0x804D8AAC, radio=0x8045071C, wpd=0x80660170, ctrl=0x803AB564),
+    'RMGK01': dict(sample=0x80452C14, ring=0x804521E8, probe=0x804D9F9C, radio=0x80452118, wpd=0x80674AF0, ctrl=0x803ACB48),
 }
 
 

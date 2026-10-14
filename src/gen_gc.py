@@ -29,7 +29,7 @@ def build(region, dol):
     # 2. Remote-less synthesizer hook: generate sample when ring is empty
     ring_site = sites['ring']
     orig_ring = struct.unpack('>I', dol.read(ring_site, 4))[0]
-    h, size = g.hook(ring_site, orig_ring, cur, g.read('gc_synth.s'), {}, consts,
+    h, size = g.hook(ring_site, orig_ring, cur, g.read('gc_synth.s'), {'WPD_TABLE': sites['wpd'], 'CTRL_OBJ': sites['ctrl']}, consts,
                      'KPAD read: synthesise Classic Controller sample from GameCube pad')
     ops.append(h)
     cur += size

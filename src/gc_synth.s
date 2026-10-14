@@ -48,23 +48,59 @@ idx:
     addi    5, 5, 1
     stb     5, 0x10f(31)
 full:
-    # Notify game that controller has connected, once
-    lwz     0, 0x1b98(31)
-    cmpwi   0, 0
-    beq     9f
+    # Announce the pad to the game.  The game registers its own WPAD-level callbacks
+    # (not KPAD's), and its error screen shows the "Wii Remote / Nunchuk communications
+    # interrupted" prompt until they have fired: connect(chan, 0), then extension(chan, 2).
+    # The game clears its connected / extension flags (+0x35 / +0x36 of the channel object)
+    # on scene changes, so announce again whenever either has dropped.
+    # WPAD control block of the channel = WPD_TABLE[chan] (connect callback at +0x8A4,
+    # extension callback at +0x8A0); WPD_TABLE and CTRL_OBJ are per region.
     lbz     0, 0x1be2(31)
     cmpwi   0, 0
+    beq     announce                    # never announced yet
+    mr      3, 27
+    lis     12, CTRL_OBJ@ha
+    addi    12, 12, CTRL_OBJ@l
+    mtctr   12
+    bctrl                               # r3 = the game's channel object
+    cmpwi   3, 0
+    beq     9f
+    lbz     0, 0x35(3)
+    cmpwi   0, 0
+    beq     announce
+    lbz     0, 0x36(3)
+    cmpwi   0, 0
     bne     9f
+announce:
+    lis     12, WPD_TABLE@ha
+    addi    12, 12, WPD_TABLE@l
+    slwi    4, 27, 2
+    lwzx    12, 12, 4
+    cmpwi   12, 0
+    beq     9f
+    lwz     11, 0x8A4(12)
+    cmpwi   11, 0
+    beq     9f                          # game has not registered yet: retry next frame
     li      0, 1
     stb     0, 0x1be2(31)
-    mr      3, 27
-    li      4, 0
-    lwz     12, 0x1b98(31)
-    mtctr   12
-    bctrl
     li      0, 0
     stb     0, 0x1be3(31)
     li      0, 1
     stb     0, 0x1bdf(31)
+    mr      3, 27
+    li      4, 0
+    mtctr   11
+    bctrl                               # connect callback (chan, 0)
+    lis     12, WPD_TABLE@ha
+    addi    12, 12, WPD_TABLE@l
+    slwi    4, 27, 2
+    lwzx    12, 12, 4
+    lwz     11, 0x8A0(12)
+    cmpwi   11, 0
+    beq     9f
+    mr      3, 27
+    li      4, 2
+    mtctr   11
+    bctrl                               # extension callback (chan, 2 = Classic Controller)
 9:
     lbz     0, 0x10f(31)                # displaced instruction

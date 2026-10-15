@@ -45,3 +45,25 @@ def assemble(source, base, syms=None, consts=None):
 def words(data):
     import struct
     return list(struct.unpack('>%dI' % (len(data) // 4), data))
+
+
+CFLAGS = ['-O2', '-mcpu=750', '-mbig-endian', '-msoft-float', '-msdata=none', '-fno-pic', '-ffreestanding',
+          '-fno-builtin', '-fno-tree-loop-distribute-patterns', '-fno-unroll-loops', '-fno-asynchronous-unwind-tables',
+          '-fno-stack-protector', '-nostdlib', '-Wall', '-Werror']
+
+
+def compile_c(c_src, s_src, ld_script, defs):
+    """Compile a C file plus its assembler entry stub into one position-independent blob.
+
+    `defs` become -D macros in both files.  The blob only branches within itself
+    (game functions are called through absolute pointers), so it runs wherever
+    it is placed: in the injected section or inside a Gecko C2 code.
+    """
+    D = ['-D%s=%s' % kv for kv in defs.items()]
+    with tempfile.TemporaryDirectory() as t:
+        c_o, s_o, elf, bn = (os.path.join(t, n) for n in ('c.o', 's.o', 'b.elf', 'b.bin'))
+        subprocess.run([_tool('gcc')] + CFLAGS + D + ['-c', c_src, '-o', c_o], check=True)
+        subprocess.run([_tool('gcc'), '-mbig-endian', '-c', '-x', 'assembler-with-cpp'] + D + [s_src, '-o', s_o], check=True)
+        subprocess.run([_tool('ld'), '-T', ld_script, '-o', elf, s_o, c_o], check=True)
+        subprocess.run([_tool('objcopy'), '-O', 'binary', '-j', '.text', elf, bn], check=True)
+        return open(bn, 'rb').read()

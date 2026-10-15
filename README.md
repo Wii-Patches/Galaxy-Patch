@@ -10,7 +10,9 @@ The patches are applied to your own clean disc image: drop a clean `.wbfs` or `.
 
 Super Mario Galaxy was designed exclusively for the Wii Remote and Nunchuk, using accelerometer shakes for Mario's Spin Attack and the IR camera for the Star Pointer.
 
-This patch synthesises native Classic Controller state directly into Nintendo's `KPAD` sample ring buffer inside `main.dol`. Downstream hooks redirect Mario's movement to the left analog stick, the Star Pointer to the right analog stick (or GameCube C-Stick), and spin attacks to dedicated buttons. When a GameCube controller is plugged in, the game detects it via the Serial Interface (SI) registers, automatically provides Classic Controller samples, and bypasses the Wii Remote connection requirements.
+This patch synthesises native Classic Controller state directly into Nintendo's `KPAD` sample ring buffer inside `main.dol`. Downstream hooks redirect Mario's movement to the left analog stick, the Star Pointer to the right analog stick (or GameCube C-Stick), and spin attacks to dedicated buttons.
+
+The game never polls the GameCube ports itself (it has no `PAD` library), so the GameCube patch drives the Wii's Serial Interface auto-poller directly: it probes the port until a pad answers, enables polling, and re-probes after an unplug. While a pad answers, it is presented to the game as a Classic Controller on the matching Wii Remote channel, so no Wii Remote is needed.
 
 ## Controls
 

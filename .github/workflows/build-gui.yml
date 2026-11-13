@@ -94,7 +94,7 @@ jobs:
             $BINS --distpath pyinst_dist tools/gui.py
           cp wit-gpl-2.0.txt "pyinst_dist/Galaxy-Patcher.app/Contents/Resources/wit-gpl-2.0.txt"
           cd pyinst_dist
-          zip -qr "../Galaxy-Patch-${{ matrix.target }}.zip" Galaxy-Patcher.app
+          zip -qr "../Galaxy-ISO-Patcher-${{ matrix.target }}.zip" Galaxy-Patcher.app
 
       - name: Build app (Linux)
         if: matrix.target == 'linux-x86_64'
@@ -107,7 +107,7 @@ jobs:
             $BINS --distpath pyinst_dist tools/gui.py
           cp wit-gpl-2.0.txt pyinst_dist/Galaxy-Patcher/
           cd pyinst_dist
-          tar -czf "../Galaxy-Patch-${{ matrix.target }}.tar.gz" Galaxy-Patcher
+          tar -czf "../Galaxy-ISO-Patcher-${{ matrix.target }}.tar.gz" Galaxy-Patcher
 
       - name: Build app (Windows)
         if: matrix.target == 'windows-x86_64'
@@ -122,19 +122,19 @@ jobs:
             $BINS --distpath pyinst_dist tools/gui.py
           cp wit-gpl-2.0.txt pyinst_dist/Galaxy-Patcher/
           cd pyinst_dist
-          7z a "../Galaxy-Patch-${{ matrix.target }}.zip" Galaxy-Patcher \
-            || powershell -Command "Compress-Archive -Path Galaxy-Patcher -DestinationPath ../Galaxy-Patch-${{ matrix.target }}.zip"
+          7z a "../Galaxy-ISO-Patcher-${{ matrix.target }}.zip" Galaxy-Patcher \
+            || powershell -Command "Compress-Archive -Path Galaxy-Patcher -DestinationPath ../Galaxy-ISO-Patcher-${{ matrix.target }}.zip"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Galaxy-Patch-${{ matrix.target }}
-          path: Galaxy-Patch-${{ matrix.target }}.*
+          name: Galaxy-ISO-Patcher-${{ matrix.target }}
+          path: Galaxy-ISO-Patcher-${{ matrix.target }}.*
 
       - name: Attach to release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: Galaxy-Patch-${{ matrix.target }}.*
+          files: Galaxy-ISO-Patcher-${{ matrix.target }}.*
 
   patch-files:
     needs: check
